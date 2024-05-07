@@ -96,8 +96,9 @@ class Manager:
         if os.path.exists(folder):
             try:
                 shutil.rmtree(folder)
-                Kit().removeRequire(self.raw)
-                print(LABLE + f" The repo '{self.vendor}/{self.package}' has been removed")
+                repo = f"{self.vendor}/{self.package}"
+                Kit().removeRequire(repo)
+                print(LABLE + f" The repo '{repo}' has been removed")
             except Exception as e:
                 print(LABLE_ERROR + RED + f" An error occurred while removing the repo: {e}" + RESET)
         else:
@@ -149,6 +150,16 @@ class Manager:
             return None
         else:
             DepotifyModel().updateRequire()
+    
+    def reinstall(self):
+        self.path_depotify = os.getcwd()+"/depotify.json"
+        if not os.path.exists(self.path_depotify):
+            print(LABLE_ERROR+RED+" No found 'depotify.json'"+RESET)
+            return None
+        else:
+            self.remove()
+            self.require()
+        
 
 
 class DepotifyModel:
