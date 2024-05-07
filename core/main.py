@@ -23,11 +23,15 @@ def controller(type):
         print(GitHub_Api_Version["X-GitHub-Api-Version"])
     if type == "require:remove":
         Manager(a2).remove()
+    if type == "require:reinstall":
+        Manager(a2).reinstall()
     if type == "require:install":
         DepotifyModel().loadRequire()
     if type == "require:update":
         DepotifyModel().updateRequire()
     if type == "require:list":
         DepotifyItems().listRequire()
+    if type == "script:list":
+        DepotifyItems().listScripts()
 
 controller(type)

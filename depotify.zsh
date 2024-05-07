@@ -3,7 +3,7 @@ CORE="${JAP_FOLDER}/plugins/packages/${name}/core"
 depotify () {
     if [[ "$1" == "v" ]];then 
         echo -e "${BGREEN}${BOLD} Depotify ${NC}"
-        echo -e "${BOLD}v0.1.0${NC}"
+        echo -e "${BOLD}v0.2.0${NC}"
         echo -e "${YELLOW}JAP plugin${NC}"
         echo "-------------------"
         echo -e "${BLUE}$(python --version)${NC}"
@@ -28,12 +28,16 @@ depotify () {
         fi
     fi
 
+    if [[ "$1" == "reinstall" ]];then
+        py "$CORE/main.py" require:reinstall "$2" x
+    fi
+
     if [[ "$1" == "i" || "$1" == "install" ]];then
         py "$CORE/main.py" require:install x x
     fi
 
     if [[ "$1" == "u" || "$1" == "update" ]];then
-         py "$CORE/main.py" require:update x x
+        py "$CORE/main.py" require:update x x
     fi
 
     if [[ "$1" == "uninstall" ]];then
@@ -60,5 +64,23 @@ depotify () {
     if [[ "$1" == "clear:cache" ]];then
         rm -r "${CORE}/__pycache__"
         echo -e "${BGREEN}${BOLD} Depotify ${NC} The cache has been emptied"
+    fi
+
+    if [[ "$1" == "run" ]];then
+        if [[ "$2" == "l" || "$2" == "list" ]];then
+            py "$CORE/main.py" script:list x x
+        else
+            if [ -e "depotify.json" ];then
+                script_name="$2"
+                JSON_DATA=$(cat depotify.json)
+                script_command=$(jq -r ".scripts[\"$script_name\"]" <<< "$JSON_DATA")
+                if [[ ! $script_command == null ]]; then
+                    echo -e "Run the script:${BOLD} '${script_name}'${NC}"
+                    eval "$script_command"
+                else
+                    echo -e "${RED}The name '$script_name' was not found in the scripts.${NC}"
+                fi
+            fi
+        fi
     fi
 }

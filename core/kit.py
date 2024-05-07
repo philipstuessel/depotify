@@ -137,4 +137,19 @@ class DepotifyItems:
             print("")
         else:
             print(LABLE_ERROR+RED+" No found 'depotify.json'"+RESET)
-        
+            
+    def listScripts(self):
+        if os.path.exists(self.path_depotify):
+            with open(self.path_depotify, 'r') as file:
+                data = json.load(file)
+                if 'scripts' in data:
+                    scripts_list = data['scripts']
+                    if len(scripts_list) == 0:
+                        print(LABLE_WARN+YELLOW+" No Scripts"+RESET)
+                        return None
+                    print(LABLE+BWHITE+f" List Scripts: {RESET}\n")
+                    for alias, cmd in scripts_list.items():
+                        print(BOLD+alias+RESET+f" => {CYAN}'{cmd}'{RESET}")
+            print("")
+        else:
+            print(LABLE_ERROR+RED+" No found 'depotify.json'"+RESET)
