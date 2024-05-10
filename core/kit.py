@@ -73,7 +73,7 @@ class Kit:
             tagVF = tagV[1:] if tagV.startswith("v") else tagV
             tags.append(tagVF)
         
-        return self.find_next_patch_version(version, tags, self.check_prefix(test_tag))
+        return self.find_next_version(version, tags, self.check_prefix(test_tag))
 
     def check_prefix(self, tags):
         if tags and tags[0].startswith('v'):
@@ -84,16 +84,16 @@ class Kit:
         parts = re.split(r'[^0-9]+', version, maxsplit=3)[:3]
         major, minor, patch = map(int, parts)
         return major, minor, patch
-    
-    def find_next_patch_version(self, version, tags, prefix):
+
+    def find_next_version(self, version, tags, prefix=''):
         input_major, input_minor, input_patch = self.parse_version(version)
-        compatible_versions = [v for v in tags if v.startswith(f"{input_major}.{input_minor}.")]
+        compatible_versions = [v for v in tags if v.startswith(f"{input_major}.")]
         compatible_versions.sort(reverse=True)
-    
         for v in compatible_versions:
             major, minor, patch = self.parse_version(v)
-            if patch > input_patch:
-                return prefix+v
+            if major == input_major:
+                if minor > input_minor or (minor == input_minor and patch > input_patch):
+                    return prefix + v
         return False
 
 class DepotifyItems:

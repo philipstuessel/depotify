@@ -3,7 +3,7 @@ CORE="${JAP_FOLDER}/plugins/packages/${name}/core"
 depotify () {
     if [[ "$1" == "v" ]];then 
         echo -e "${BGREEN}${BOLD} Depotify ${NC}"
-        echo -e "${BOLD}v0.2.0${NC}"
+        echo -e "${BOLD}v0.3.0${NC}"
         echo -e "${YELLOW}JAP plugin${NC}"
         echo "-------------------"
         echo -e "${BLUE}$(python --version)${NC}"
