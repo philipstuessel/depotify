@@ -18,7 +18,11 @@ class Manager:
         self.work_dir = DepotifyItems().getFolder()
     
     def check(self, prefix = ""):
-        folder = self.work_dir+"/"+self.package
+        f = DepotifyItems().getFormat(self.vendor)
+        if f == "":
+            folder = self.work_dir + self.package
+        else:
+            folder = self.work_dir + "/" +f+"/"+self.package
         if os.path.exists(folder):
             print(LABLE_ERROR+RED+" The repo already exists"+RESET)
             return None
@@ -61,7 +65,7 @@ class Manager:
     
     def zipler(self, url, version, prefix=""):
         response = requests.get(url)
-        folder = self.work_dir+"/"
+        folder = self.work_dir+"/"+DepotifyItems().getFormat(self.vendor)+"/"
         if not os.path.exists(folder):
             os.makedirs(folder)
         printm(LABLE+" repo would be unpacked")
@@ -91,13 +95,29 @@ class Manager:
             with zipfile.ZipFile(zip_file, 'r') as zip_ref:
                 zip_ref.extractall(extract_to)
 
+    def check_subfolders(self, directory):
+        entries = os.listdir(directory)
+        folders_found = False
+        for entry in entries:
+            if os.path.isdir(os.path.join(directory, entry)):
+                folders_found = True
+                break
+        return folders_found
+
     def remove(self):
-        folder = self.work_dir + "/" + self.package
+        f = DepotifyItems().getFormat(self.vendor)
+        if f == "":
+            folder = self.work_dir + self.package
+        else:
+            folder = self.work_dir + "/" +f+"/"+self.package
         if os.path.exists(folder):
             try:
                 shutil.rmtree(folder)
                 repo = f"{self.vendor}/{self.package}"
                 Kit().removeRequire(repo)
+                if not f == "":
+                    if not self.check_subfolders(self.work_dir+"/"+self.vendor):
+                        shutil.rmtree(self.work_dir+"/"+self.vendor)
                 print(LABLE + f" The repo '{repo}' has been removed")
             except Exception as e:
                 print(LABLE_ERROR + RED + f" An error occurred while removing the repo: {e}" + RESET)
@@ -160,8 +180,6 @@ class Manager:
             self.remove()
             self.require()
         
-
-
 class DepotifyModel:
     def __init__(self):
         self.path_depotify = os.getcwd()+"/depotify.json"
@@ -177,7 +195,10 @@ class DepotifyModel:
                         version = Kit().getVersion(version)
                         version = version[1:] if version.startswith("v") else version
                         repo_name = package.split("/")
-                        response = (RESTAPI().get("tags", repo_name[0], repo_name[1]))[0]
+                        response = (RESTAPI().get("tags", repo_name[0], repo_name[1]))
+                        if response == None:
+                            return None
+                        response = response[0]
                         prefix = ""
                         if (response["name"][:1] == "v"):
                             prefix = "v"
@@ -189,6 +210,8 @@ class DepotifyModel:
     def updateRequire(self):
         if os.path.exists(self.path_depotify):
             with open(self.path_depotify, 'r') as file:
+                work_dir = DepotifyItems().getFolder()
+                f = DepotifyItems().getFormat("get")
                 data = json.load(file)
                 if 'require' in data:
                     require_list = data['require']
@@ -197,13 +220,18 @@ class DepotifyModel:
                         if version[:1] == "^":
                             repo_name = package.split("/")
                             new_version = Kit().upVersion(version, repo_name[0], repo_name[1])
-                            if not new_version:
+                            if new_version == None:
+                                return None
+                            elif not new_version:
                                 print(BOLD+package+RESET+GREEN+" Is up to date"+RESET)
                             else:
                                 Kit().removeRequire(package)
                                 manager = Manager(f"{package}:{new_version}")
-                                work_dir = DepotifyItems().getFolder()
-                                folder =  work_dir + "/" + repo_name[1]
+                                folder = ""
+                                if f == False:
+                                    folder = work_dir+"/"+repo_name[1]
+                                else:
+                                    folder = work_dir + "/"+repo_name[0]+"/"+repo_name[1]
                                 shutil.rmtree(folder)
                                 manager.require("mute")
                                 version = Kit().getVersion(version)

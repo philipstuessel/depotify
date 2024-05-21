@@ -20,7 +20,6 @@ class RESTAPI():
             response = requests.get(url)
         else:
             response = requests.get(url, headers=self.haeder())
-        
         if not response.status_code == 200:
             print(GITHUB_ERROR_LABLE+f"{RED}Error: {response.status_code}             "+RESET)
             return None

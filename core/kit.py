@@ -64,6 +64,9 @@ class Kit:
         v = self.getVersion(v)
         version = v[1:] if v.startswith("v") else v
         response = (RESTAPI().get("tags", owner, repo))
+        if response == None:
+            exit
+            return None
         tags = []
         test_tag = ""
         for tag in response:
@@ -137,7 +140,26 @@ class DepotifyItems:
             print("")
         else:
             print(LABLE_ERROR+RED+" No found 'depotify.json'"+RESET)
-            
+    
+    def getFormat(self, owner):
+        dj = self.getDJ()
+        with open(dj, "r") as json_file:
+            data = json.load(json_file)
+            if not 'format' in data or data['format'] == "":
+                if owner == "get":
+                    return False
+                else:
+                    return ""
+            else:
+                f = data['format']
+                if f == "r":
+                    if owner == "get":
+                        return False
+                    else:
+                        return ""
+                elif f == "o/r":
+                    return owner
+
     def listScripts(self):
         if os.path.exists(self.path_depotify):
             with open(self.path_depotify, 'r') as file:
