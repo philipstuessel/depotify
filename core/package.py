@@ -107,7 +107,7 @@ class Manager:
     def remove(self):
         f = DepotifyItems().getFormat(self.vendor)
         if f == "":
-            folder = self.work_dir + self.package
+            folder = self.work_dir +"/"+ self.package
         else:
             folder = self.work_dir + "/" +f+"/"+self.package
         if os.path.exists(folder):
